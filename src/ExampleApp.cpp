@@ -47,6 +47,10 @@ void ExampleApp::onButtonDown(const VRButtonEvent &event) {
 	
 	//std::cout << "ButtonDown: " << event.getName() << std::endl;
     
+    // Makes the texture at least look like it's going in the right direction regardless of keys pressed
+    glm::vec4 currPos = column(sphereFrame, 3);
+    sphereFrame = column(mat4(1.0), 3, currPos);
+    
     string name = event.getName();
     float speed = 0.01;
     
@@ -76,7 +80,25 @@ void ExampleApp::onButtonUp(const VRButtonEvent &event) {
     // This routine is called for all Button_Up events.  Check event->getName()
     // to see exactly which button has been released.
 
-	//std::cout << "ButtonUp: " << event.getName() << std::endl;
+    //std::cout << "ButtonUp: " << event.getName() << std::endl;
+    
+    //Stops the ball if no keys are pressed
+    
+//    string name = event.getName();
+//    float speed = 0.01;
+//
+//    if (name == "KbdUp_Up") {
+//        dir = dir - vec3(0,0,-speed);
+//    }
+//    else if (name == "KbdDown_Up") {
+//        dir = dir - vec3(0,0,speed);
+//    }
+//    else if (name == "KbdLeft_Up") {
+//        dir = dir - vec3(-speed,0,0);
+//    }
+//    else if (name == "KbdRight_Up") {
+//        dir = dir - vec3(speed,0,0);
+//    }
 }
 
 void ExampleApp::onCursorMove(const VRCursorEvent &event) {
@@ -139,11 +161,15 @@ void ExampleApp::onRenderGraphicsContext(const VRGraphicsState &renderState) {
     
     //TODO: Update the sphereFrame matrix to move the ball's position based on the dir variable.
     //Make the ball rotate so that it looks like it is rolling on the table.
+    glm::vec4 currPos = column(sphereFrame, 3);
+    sphereFrame = column(sphereFrame, 3, vec4(0, 0, 0, 1));
+
+    if (glm::length(dir) > 0) {
+        mat3 yRotationMat = toMat3(angleAxis(radians(90.0f), vec3(0, 1, 0)));
+        sphereFrame = rotate(sphereFrame, radians(1.0f), yRotationMat * dir);
+    }
     
-    
-    
-    
-    
+    sphereFrame = column(sphereFrame, 3, currPos + vec4(dir, 0));
 }
 
 void ExampleApp::onRenderGraphicsScene(const VRGraphicsState &renderState) {
